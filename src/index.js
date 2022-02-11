@@ -66,7 +66,8 @@ function initiateKeys() {
 function operatorClicked(value) {
   secondOperand = '';
   const length = screen.value.toString().length;
-  if (value === '-' && (length === 0 || (length === 1 && waiting))) {
+  if ((value === '-' && memory === '' && (length === 0 || (length === 1 && waiting)))
+        || (value === '-' && memory !== '' && waiting)) {
     inputClicked(value);
   } else {
     memory = screen.value.toString();
