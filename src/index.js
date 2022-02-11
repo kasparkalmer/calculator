@@ -1,4 +1,5 @@
 'use strict'
+import './styles.css';
 
 let buttons = document.querySelectorAll('.btn');
 let screen = document.querySelector('.calculator-screen');
