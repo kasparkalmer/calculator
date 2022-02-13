@@ -81,6 +81,7 @@ function clear() {
   if (screen.value.toString().length === 0) {
     currentResult = undefined;
     operator = '';
+    clearButton.classList.add('disabled');
   } else {
     clearButton.textContent = 'CE';
   }
@@ -90,19 +91,21 @@ function clear() {
 }
 
 function removeLast() {
-  const length = screen.value.toString().length - 1;
-  screen.value = screen.value.toString().substr(0, length);
-  operand = screen.value;
+  if (!calculated) {
+    const length = screen.value.toString().length - 1;
+    screen.value = screen.value.toString().substr(0, length);
+    operand = screen.value;
+  }
 }
 
 function equals() {
-  if (screen.value) {
+  if (screen.value && !operatorLast) {
     if (currentResult === undefined || operator === '') {
       currentResult = parseFloat(screen.value);
-      waitingForInput = true;
     } else {
       currentResult = calculate();
     }
+    waitingForInput = true;
     screen.value = currentResult.toString().length > 11 ? currentResult.toExponential(6) : currentResult;
     calculated = true;
   }
@@ -121,6 +124,7 @@ function inputClicked(input) {
 
   if (current.length === 0) {
     clearButton.textContent = 'C';
+    clearButton.classList.remove('disabled');
   }
 
   if (input === '0' && (current === '0' || current === '-0')) {
