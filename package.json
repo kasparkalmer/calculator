@@ -4,7 +4,8 @@
   "description": "Calculator",
   "main": "index.js",
   "scripts": {
-    "serve": "npx webpack serve --mode development"
+    "serve": "npx webpack serve --mode development",
+    "build": "npx webpack"
   },
   "author": "Kaspar Kalmer",
   "license": "ISC",

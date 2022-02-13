@@ -4,28 +4,15 @@ import './styles.css';
 let buttons = document.querySelectorAll('.btn');
 let screen = document.querySelector('.calculator-screen');
 let clearButton = document.querySelector('.btn-danger');
-let memory = '';
-let secondOperand = '';
+let currentResult;
 let operator = '';
-let waiting = false;
+let operand = '';
+let calculated = false;
+let waitingForInput = false;
+let operatorLast = true;
 
 initiateButtons();
 initiateKeys();
-
-function calculate(operand1, operand2, operator) {
-  switch(operator) {
-    case '+':
-      return parseFloat(operand1) + parseFloat(operand2);
-    case '-':
-      return parseFloat(operand1) - parseFloat(operand2);
-    case '*':
-      return parseFloat(operand1) * parseFloat(operand2);
-    case '/':
-      return parseFloat(operand1) / parseFloat(operand2);
-    default:
-      return 0;
-  }
-}
 
 function initiateButtons() {
   buttons.forEach((button) => {
@@ -59,55 +46,75 @@ function initiateKeys() {
     } else if (event.key === 'Enter') {
       equals();
     }
-    console.log(event.key);
   });
 }
 
+function calculate() {
+  switch(operator) {
+    case '+':
+      return currentResult + parseFloat(operand);
+    case '-':
+      return currentResult - parseFloat(operand);
+    case '*':
+      return currentResult * parseFloat(operand);
+    case '/':
+      return currentResult / parseFloat(operand);
+    default:
+      return 0;
+  }
+}
+
 function operatorClicked(value) {
-  secondOperand = '';
-  const length = screen.value.toString().length;
-  if ((value === '-' && memory === '' && (length === 0 || (length === 1 && waiting)))
-        || (value === '-' && memory !== '' && waiting)) {
+  if (operatorLast && value === '-') {
     inputClicked(value);
-  } else {
-    memory = screen.value.toString();
+  } else if (operand && operand !== '-') {
+    if (!calculated) {
+      equals();
+    }
     operator = value;
-    waiting = true;
+    operatorLast = true;
+    waitingForInput = true;
   }
 }
 
 function clear() {
   if (screen.value.toString().length === 0) {
-    memory = '';
+    currentResult = undefined;
     operator = '';
   } else {
     clearButton.textContent = 'CE';
   }
-  secondOperand = '';
   screen.value = '';
+  operand = '';
+  operatorLast = true;
 }
 
 function removeLast() {
   const length = screen.value.toString().length - 1;
   screen.value = screen.value.toString().substr(0, length);
+  operand = screen.value;
 }
 
 function equals() {
-  let result;
-  if (secondOperand !== '') {
-    result = calculate(memory, secondOperand.toString(), operator);
-  } else {
-    result = calculate(memory, screen.value.toString(), operator);
-    secondOperand = screen.value;
+  if (screen.value) {
+    if (currentResult === undefined || operator === '') {
+      currentResult = parseFloat(screen.value);
+      waitingForInput = true;
+    } else {
+      currentResult = calculate();
+    }
+    screen.value = currentResult.toString().length > 11 ? currentResult.toExponential(6) : currentResult;
+    calculated = true;
   }
-  memory = result;
-  screen.value = result.toString().length > 11 ? result.toExponential(6) : result;
 }
 
 function inputClicked(input) {
-  if (waiting) {
+  calculated = false;
+  operatorLast = false;
+
+  if (waitingForInput) {
     screen.value = '';
-    waiting = false;
+    waitingForInput = false;
   }
 
   const current = screen.value.toString();
@@ -116,11 +123,12 @@ function inputClicked(input) {
     clearButton.textContent = 'C';
   }
 
-  if (current === '0' && input === '0') {
+  if (input === '0' && (current === '0' || current === '-0')) {
     return;
   }
 
   if ((!isNaN(input) || input === '-' || (input === '.' && !current.includes('.'))) && current.length <= 10) {
     screen.value = screen.value + input;
+    operand = screen.value;
   }
 }
